@@ -14,6 +14,9 @@ const int cols = 10;
 const int cell_size = 30;
 int offset = 75;
 
+int screen_width = (cell_size * cols) + (2 * offset) + 50;
+int screen_height = (cell_size * rows) + (2 * offset) + 100;
+
 const int alphabet_size = 30;
 string alphabet[alphabet_size] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", 
                                   "J", "K", "L", "M", "N", "O", "P", "Q", "R", 
@@ -37,7 +40,7 @@ public:
                                          {-1, 0},           {1, 0},
                                          {-1, 1},  {0, 1},  {1, 1}};
 
-    void fill_in_board(vector<string> word_list)
+    void fill_in_board(vector<string>& word_list)
     {
         // set up all board
         for (int i = 0; i < rows; i++) 
@@ -208,13 +211,46 @@ public:
             {
                 letter_type cur = board[i][j];
                 DrawText(cur.letter.c_str(), 
-                         (j * cell_size) + offset, 
-                         (i * cell_size) + offset, 
+                         (j * cell_size) + offset + 25, 
+                         (i * cell_size) + offset + 75, 
                          cell_size - 5, black);
             }
         }
     }
 };
+
+
+class WordsToFind
+{
+
+public:
+
+    void draw(vector<string>& word_list)
+    {
+        int len = word_list.size();
+        int offset_width = 0;
+        int offset_height = 0;
+        int size = cell_size - 10;
+
+        for (int w = 0; w < len; w++)
+        {
+            int width = 100 + offset_width;
+            int height = 50 + offset_height;
+            
+            string curr = word_list[w];
+            DrawText(curr.c_str(), width, height, size, black);
+
+            offset_width += (curr.length() * (cell_size/2)); 
+            if (width >= screen_width - 25 - size - offset_width) 
+            {
+                offset_height += size + 5;
+                offset_width = 0;
+            }
+        }
+    }
+
+};
+
 
 
 vector<string> read_word_list(string filename)
@@ -262,13 +298,12 @@ int main()
     }
     cout << "------------" << endl;
 
-    InitWindow((cell_size * cols) + (2 * offset), 
-               (cell_size * rows) + (2 * offset), 
-               "Word Search");
+    InitWindow(screen_width, screen_height, "Word Search");
     SetTargetFPS(60);
 
     Board board = Board();
     board.fill_in_board(word_list);
+    WordsToFind words_to_find = WordsToFind();
 
     while (WindowShouldClose() == false) 
     {
@@ -277,6 +312,7 @@ int main()
         ClearBackground(white);
 
         board.draw();
+        words_to_find.draw(word_list);
 
         EndDrawing();
     }
